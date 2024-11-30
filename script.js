@@ -2,6 +2,8 @@ const socket = new WebSocket("wss://microstudio.dev");
 let request_id = 0;
 const callbacks = {};
 
+let user = localStorage.user;
+
 socket.onmessage = function(event) {
   const data = JSON.parse(event.data);
   const id = data.request_id;
@@ -60,31 +62,62 @@ async function get_projects(user) {
   return projects;
 }
 
-socket.onopen = async function() {
-  console.log("socket open");
-  /*
-  await send({
-    name: "get_public_project",
-    owner: "TwiceUponATime",
-    project: "onebit",
-  })
-  */
-  function add_cell(tr, text) {
+async function load_stats() {
+  if (!user) {
+    return;
+  }
+
+  const table = document.getElementById("projects");
+  while (table.length > 1) {
+    table.removeChild(table.children[1]);
+  }
+
+  function add_cell(tr, content) {
     let cell = document.createElement("td");
-    cell.innerText = text;
+    if (content instanceof HTMLElement) {
+      cell.appendChild(content);
+    } else {
+      cell.innerText = content;
+    }
     tr.appendChild(cell);
   }
 
-  const projects = await get_projects("gilles");
-  const table = document.getElementById("projects");
+  const projects = await get_projects(user);
+  table.style.display = "";
+
+  document.getElementById("submit").innerText = "Change user"
+  document.getElementById("user").placeholder = user;
+
   for (const project of projects) {
     const row = document.createElement("tr");
-    add_cell(row, project.title);
+    let project_link = document.createElement("a");
+    project_link.innerText = project.title;
+    project_link.href = `https://microstudio.dev/i/${user}/${project.slug}`
+    add_cell(row, project_link);
     add_cell(row, project.slug);
     add_cell(row, project.likes);
-    add_cell(row, "N/A")
+    let result = await send({
+      name: "get_project_comments",
+      project: project.id,
+    })
+    add_cell(row, result.comments.length);
     table.appendChild(row);
   }
 }
 
-console.log(socket);
+socket.onopen = load_stats;
+
+if (user) {
+  document.getElementById("submit").innerText = "Change user"
+  document.getElementById("user").placeholder = user;
+}
+
+const form = document.getElementById("username");
+form.addEventListener("submit", event => {
+  event.preventDefault();
+  const data = new FormData(form);
+  let username = data.get("user");
+  localStorage.user = username;
+  user = username;
+  load_stats();
+});
