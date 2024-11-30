@@ -82,27 +82,77 @@ async function load_stats() {
     tr.appendChild(cell);
   }
 
+  const user_input = document.getElementById("user");
+  document.getElementById("submit").innerText = "Change user"
+  user_input.placeholder = user;
+  user_input.value = "";
+
   const projects = await get_projects(user);
   table.style.display = "";
 
-  document.getElementById("submit").innerText = "Change user"
-  document.getElementById("user").placeholder = user;
-
+  const project_stats = {};
+  const progress = document.getElementById("progress");
+  let loaded = 0;
   for (const project of projects) {
-    const row = document.createElement("tr");
-    let project_link = document.createElement("a");
-    project_link.innerText = project.title;
-    project_link.href = `https://microstudio.dev/i/${user}/${project.slug}`
-    add_cell(row, project_link);
-    add_cell(row, project.slug);
-    add_cell(row, project.likes);
     let result = await send({
       name: "get_project_comments",
       project: project.id,
     })
+    project_stats[project.slug] = {
+      title: project.title,
+      likes: project.likes,
+      comments: result.comments.length
+    }
+    const row = document.createElement("tr");
+    add_cell(row, project_link(project.slug, project.title));
+    add_cell(row, project.slug);
+    add_cell(row, project.likes);
     add_cell(row, result.comments.length);
     table.appendChild(row);
+    progress.innerText = `${++loaded}/${projects.length}`;
   }
+
+  let project_stats_old = localStorage.project_stats;
+  if (!project_stats_old) {
+    project_stats_old = {};
+  } else {
+    project_stats_old = JSON.parse(project_stats_old);
+  }
+
+  const alerts = document.createElement("div");
+  alerts.id = "alerts";
+  for (const slug in project_stats_old) {
+    const stats_old = project_stats_old[slug];
+    const stats = project_stats[slug];
+    const title = stats.title;
+    if (!stats) {
+      continue;
+    }
+    let new_likes;
+    if (new_likes = stats.likes - stats_old.likes) {
+      let plural = new_likes == 1 ? "" : "s";
+      alerts.appendChild(project_link(slug, title));
+      alerts.appendChild(new Text(` has ${new_likes} new like${plural}!`));
+      alerts.appendChild(document.createElement("br"));
+    }
+    let new_comments;
+    if (new_comments = stats.comments - stats_old.comments) {
+      let plural = new_comments == 1 ? "" : "s";
+      alerts.appendChild(project_link(slug, title));
+      alerts.appendChild(new Text(` has ${new_comments} new comment${plural}!`));
+      alerts.appendChild(document.createElement("br"));
+    }
+  }
+  document.getElementById("alerts").replaceWith(alerts);
+
+  localStorage.project_stats = JSON.stringify(project_stats);
+}
+
+function project_link(slug, title) {
+  let result = document.createElement("a");
+  result.innerText = title;
+  result.href = `https://microstudio.dev/i/${user}/${slug}`
+  return result;
 }
 
 socket.onopen = load_stats;
