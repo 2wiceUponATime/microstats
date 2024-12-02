@@ -44,7 +44,6 @@ async function load_stats() {
             name: "get_project_comments",
             project: project.id,
           });
-          console.log(`loaded project ${project.title}`);
           project_stats[project.slug] = {
             title: project.title,
             likes: project.likes,
@@ -60,11 +59,8 @@ async function load_stats() {
 
   await promise_done;
   for (const promise of promises) {
-    console.log("await", promise);
     await promise;
   }
-  console.log("done waiting");
-  console.log(sort);
   sort((a, b) => {
     return compare(b[2], a[2]);
   })

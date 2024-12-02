@@ -40,5 +40,5 @@ export function reload() {
 }
 
 export function sort(compare_fn) {
-  console.log(rows.sort(compare_fn));
+  rows.sort(compare_fn);
 }
