@@ -1,28 +1,30 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>MicroStats</title>
-    <link rel="stylesheet" href="/microstats/globals.css">
-  </head>
-  <body>
-    <div class="header shadow">
-      <h1>MicroStats</h1>
-      <form id="username" class="panel shadow">
-        <input type="text" name="user" id="user" placeholder="Enter your username... (case sensitive)">
-        <button type="submit" id="submit">View stats!</button>
-      </form> <br/>
-    </div>
-    <div class="content">
-      <div id="alerts">Loading stats (<span id="progress">0/0</span>)...</div> <br/>
-      <table id="projects" style="display: none;">
-        <tr>
-          <th>Name</th>
-          <th>Slug</th>
-          <th>Likes</th>
-          <th>Comments</th>
-        </tr>
-      </table>
-      <script type="module" src="/microstats/script.js"></script>
-    </div>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MicroStats</title>
+  <link rel="stylesheet" href="/microstats/globals.css">
+</head>
+<body>
+  <div class="header shadow">
+    <h1>MicroStats</h1>
+    <form id="username" class="panel shadow">
+      <input type="text" name="user" id="user" placeholder="Enter your username... (case sensitive)">
+      <button type="submit" id="submit">View stats!</button>
+    </form> <br/>
+  </div>
+  <div class="content">
+    <div id="alerts">Loading stats (<span id="progress">0/0</span>)...</div> <br/>
+    <table id="projects" style="display: none;">
+      <tr>
+        <th>Name</th>
+        <th>Slug</th>
+        <th>Likes</th>
+        <th>Comments</th>
+      </tr>
+    </table>
+    <script type="module" src="/microstats/script.js"></script>
+  </div>
+</body>
 </html>
